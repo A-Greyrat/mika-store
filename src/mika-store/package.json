@@ -1,0 +1,12 @@
+{
+  "name": "mika-store",
+  "version": "1.0.1",
+  "description": "mika-store is a simple hook-based state management library",
+  "main": "index.js",
+  "keywords": [
+    "react",
+    "state",
+    "management",
+    "hook"
+  ]
+}
