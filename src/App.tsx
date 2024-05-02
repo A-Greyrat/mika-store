@@ -2,25 +2,55 @@ import './App.css';
 import {useStore} from "./mika-store";
 
 const Component = () => {
-    const [state, setState] = useStore('count', 0);
+    const [action, setAction] = useStore<() => unknown>('action', () => {
+        return () => {
+            console.log('action');
+        }
+    });
+    const [count, setCount] = useStore<number>('count', () => 0);
 
     return (
         <div>
-            <p>{state}</p>
-            <button onClick={() => setState(count => count + 1)}>+</button>
-            <button onClick={() => setState(state! - 1)}>-</button>
+            <button onClick={action}>action</button>
+            <button onClick={() => {
+                setAction(() => {
+                    return () => console.log('Component action');
+                });
+            }}>
+                set action
+            </button>
+            {count}
+            <button onClick={() => {
+                setCount(count + 1);
+            }}>
+                add count
+            </button>
         </div>
     );
 };
 
 const App = () => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [state, _setState] = useStore('count', 0);
+    const [action, setAction] = useStore<() => unknown>('action');
+    const [count, setCount] = useStore<number>('count');
 
     return (
         <div>
             <Component/>
-            <p>{state}</p>
+            <button onClick={action}>action</button>
+            <button onClick={() => {
+                setAction(() => {
+                    return () => console.log('App action');
+                });
+            }}>
+                set action
+            </button>
+            {count}
+
+            <button onClick={() => {
+                setCount(0);
+            }}>
+                reset count
+            </button>
         </div>
     );
 };

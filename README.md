@@ -14,32 +14,59 @@ npm install mika-store
 `useStore` just like `useState` in React, but it's a global state.  
 `useStore` accepts two parameters, the first is the key of the state, the second is the initial value of the state.
 
-```javascript
+```tsx
 import { useStore } from 'mika-store';
 
 const Component = () => {
-    const [state, setState] = useStore('count', 0);
+    const [action, setAction] = useStore<() => unknown>('action', () => {
+        return () => {
+            console.log('action');
+        }
+    });
+    const [count, setCount] = useStore<number>('count', () => 0);
 
     return (
         <div>
-            <p>{state}</p>
-            <button onClick={() => setState(count => count + 1)}>+</button>
-            <button onClick={() => setState(state - 1)}>-</button>
+            <button onClick={action}>action</button>
+            <button onClick={() => {
+                setAction(() => {
+                    return () => console.log('Component action');
+                });
+            }}>
+                set action
+            </button>
+            {count}
+            <button onClick={() => {
+                setCount(count + 1);
+            }}>
+                add count
+            </button>
         </div>
     );
 };
 
 const App = () => {
-    const [state, setState] = useStore('count', 0);
+    const [action, setAction] = useStore<() => unknown>('action');
+    const [count, setCount] = useStore<number>('count');
 
     return (
         <div>
             <Component/>
-            {/* 
-                The state of the Component and the App is the same, 
-                so the count of the App will be updated when the count of the Component is updated.
-            */}
-            <p>{state}</p>
+            <button onClick={action}>action</button>
+            <button onClick={() => {
+                setAction(() => {
+                    return () => console.log('App action');
+                });
+            }}>
+                set action
+            </button>
+            {count}
+
+            <button onClick={() => {
+                setCount(0);
+            }}>
+                reset count
+            </button>
         </div>
     );
 };
@@ -49,7 +76,7 @@ const App = () => {
 `useLazyStore` is similar to `useStore`, but it will not trigger the re-render of the component when the state is updated.  
 `useLazyStore` is like a global `useRef` in React.
 
-```javascript
+```jsx
 
 import { useLazyStore } from 'mika-store';
 
