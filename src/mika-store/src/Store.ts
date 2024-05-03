@@ -60,4 +60,5 @@ class Store {
     }
 }
 
-export default Store.getInstance();
+const Instance = Store.getInstance();
+export default Instance;
