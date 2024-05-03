@@ -1,6 +1,5 @@
 import {useCallback, useEffect, useRef, useState} from "react";
 import Store from "../Store";
-import useForceUpdate from "./useForceUpdate";
 import State from "../State.ts";
 
 /**
@@ -12,11 +11,11 @@ import State from "../State.ts";
  * @returns {[T, (newValue: T) => void]} A tuple where the first item is the current state and the second item is a function to update the state.
  */
 const useStore = <T, >(name: string, value?: T | (() => T)): readonly [T, (newValue: (((prev: T) => T) | T)) => void] => {
-    const forceUpdate = useForceUpdate();
-
     const state = useRef<T | null | undefined>(null);
     const unsubscribe = useRef<() => void | undefined>();
     const storedState = useRef<State | undefined>(Store.getState(name));
+    // if using ref to save the value, in strict mode, the value will not be updated
+    const [realValue, setRealValue] = useState<T>(() => storedState.current?.getValue<T>() as T);
 
     // If the state does not exist, create a new state and subscribe to it.
     // Otherwise, just subscribe to the existing state.
@@ -24,11 +23,8 @@ const useStore = <T, >(name: string, value?: T | (() => T)): readonly [T, (newVa
         state.current = value instanceof Function ? value() : value;
 
         !storedState.current && (storedState.current = Store.addState(name, state));
-        unsubscribe.current = Store.subscribe(storedState.current!, forceUpdate);
+        unsubscribe.current = Store.subscribe(storedState.current!, (value) => setRealValue(value as T));
     }
-
-    // if using ref to save the value, in strict mode, the value will not be updated
-    const [realValue, setRealValue] = useState<T>(() => storedState.current?.getValue<T>() as T);
 
     if (realValue !== storedState.current?.getValue<T>()) {
         setRealValue(() => {
