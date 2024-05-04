@@ -7,10 +7,10 @@ import Store from "../Store.ts";
  *
  * @template T The type of the state value.
  * @param {string} name The name of the state. This is used as a key to retrieve the state from the Store.
- * @param {T | () => T} [value] The initial value of the state. This is used only when the state is created for the first time.
+ * @param {T | () => T} [initValue] The initial value of the state. This is used only when the state is created for the first time.
  * @returns {[T, (newValue: T) => void]} A tuple where the first item is the current state and the second item is a function to update the state.
  * */
-const useLazyStore = <T, >(name: string, value?: T | (() => T)): readonly [T, (newValue: (((prev: T) => T) | T)) => void] => {
+const useLazyStore = <T, >(name: string, initValue?: T | (() => T)): readonly [T, (newValue: (((prev: T) => T) | T)) => void] => {
     const state = useRef<T | null | undefined>(null);
     const unsubscribe = useRef<() => void>();
     const storedState = useRef(Store.getState(name));
@@ -19,7 +19,7 @@ const useLazyStore = <T, >(name: string, value?: T | (() => T)): readonly [T, (n
     // If the state does not exist, create a new state and subscribe to it.
     // Otherwise, just subscribe to the existing state.
     if (state.current === null) {
-        state.current = value instanceof Function ? value() : value;
+        state.current = initValue instanceof Function ? initValue() : initValue;
 
         !storedState.current && (storedState.current = Store.addState(name, state));
         unsubscribe.current = Store.subscribe(storedState.current!, (value) => setRealValue(value as T));
@@ -33,9 +33,9 @@ const useLazyStore = <T, >(name: string, value?: T | (() => T)): readonly [T, (n
 
     useEffect(() => {
         if (typeof storedState.current?.getValue<T>() === 'undefined' && typeof state.current !== 'undefined') {
-            storedState.current!.setValue(value);
+            storedState.current!.setValue(initValue);
         }
-    }, [value]);
+    }, [initValue]);
 
     const setState = useCallback((newValue: T | ((prev: T) => T)) => {
         storedState.current!.setValue(newValue);

@@ -1,6 +1,6 @@
 {
   "name": "mika-store",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "mika-store is a simple hook-based state management library",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",

@@ -7,10 +7,10 @@ import State from "../State.ts";
  *
  * @template T The type of the state.
  * @param {string} name The name of the state.
- * @param {T | () => T} [value] The initial value of the state.
+ * @param {T | () => T} [initValue] The initial value of the state.
  * @returns {[T, (newValue: T) => void]} A tuple where the first item is the current state and the second item is a function to update the state.
  */
-const useStore = <T, >(name: string, value?: T | (() => T)): readonly [T, (newValue: (((prev: T) => T) | T)) => void] => {
+const useStore = <T, >(name: string, initValue?: T | (() => T)): readonly [T, (newValue: (((prev: T) => T) | T)) => void] => {
     const state = useRef<T | null | undefined>(null);
     const unsubscribe = useRef<() => void | undefined>();
     const storedState = useRef<State | undefined>(Store.getState(name));
@@ -20,7 +20,7 @@ const useStore = <T, >(name: string, value?: T | (() => T)): readonly [T, (newVa
     // If the state does not exist, create a new state and subscribe to it.
     // Otherwise, just subscribe to the existing state.
     if (state.current === null) {
-        state.current = value instanceof Function ? value() : value;
+        state.current = initValue instanceof Function ? initValue() : initValue;
 
         !storedState.current && (storedState.current = Store.addState(name, state));
         unsubscribe.current = Store.subscribe(storedState.current!, (value) => setRealValue(value as T));
@@ -41,9 +41,9 @@ const useStore = <T, >(name: string, value?: T | (() => T)): readonly [T, (newVa
 
     useEffect(() => {
         if (typeof storedState.current?.getValue<T>() === 'undefined' && typeof state.current !== 'undefined') {
-            Store.updateState<T>(name, value!);
+            Store.updateState<T>(name, initValue!);
         }
-    }, [name, value]);
+    }, [name, initValue]);
 
     const setState = useCallback((newValue: T | ((prev: T) => T)) => {
         Store.updateState<T>(name, newValue);

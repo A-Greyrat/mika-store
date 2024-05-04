@@ -1,3 +1,5 @@
-export declare const useStore: <T>(initialState: T) => [T, (newState: T) => void];
-export declare const useLazyStore: <T>(initialState: T) => [T, (newState: T) => void];
-export declare const useForceUpdate: () => () => void;
+export declare function useStore<T>(name: string, initValue?: T | (() => T)): readonly [T, (newValue: (((prev: T) => T) | T)) => void];
+
+export declare function useLazyStore<T>(name: string, initValue?: T | (() => T)): readonly [T, (newValue: (((prev: T) => T) | T)) => void];
+
+export declare function useForceUpdate(): () => void;
